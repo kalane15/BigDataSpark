@@ -1,4 +1,4 @@
-name: myproject 
+name: myproject
 services:
   postgres:
     image: postgres:17
@@ -13,6 +13,47 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
       - ./data:/data
+    networks:
+      - data-network
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    networks:
+      - data-network
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+
+  spark:
+    image: spark
+    container_name: spark
+    command: tail -f /dev/null
+    ports:
+        - "4040:4040"
+    volumes:
+      - ./spark-apps:/opt/spark/work-dir
+      - ./jars/postgresql-42.7.10.jar:/opt/spark/jars/postgresql-42.7.10.jar
+    networks:
+        - data-network
+    environment:
+        - SPARK_EXTRA_CLASSPATH=/opt/spark/jars-ext/*
+        - SPARK_LOCAL_IP=spark
+    depends_on:
+        - postgres
+        - clickhouse
+
+networks:
+  data-network:
+    driver: bridge
 
 volumes:
   pgdata:
+  clickhouse-data:
+  spark-data:
