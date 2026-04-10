@@ -3,7 +3,6 @@ from pyspark.sql.functions import col, coalesce, try_to_date, row_number
 from pyspark.sql.window import Window
 
 
-
 def write_table(df, table_name):
     df.write.mode("append").jdbc(url=PG_URL, table=table_name, properties=PG_PROPS)
 
