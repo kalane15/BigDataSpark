@@ -24,30 +24,33 @@ services:
       - "9000:9000"
     volumes:
       - clickhouse-data:/var/lib/clickhouse
+      - ./config/users.d:/etc/clickhouse-server/users.d
     networks:
       - data-network
     environment:
-      CLICKHOUSE_DB: default
-      CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: ""
+        CLICKHOUSE_DB: default
+        CLICKHOUSE_USER: spark_user
+        CLICKHOUSE_PASSWORD: spark_password
+        CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
 
   spark:
     image: spark
     container_name: spark
     command: tail -f /dev/null
     ports:
-        - "4040:4040"
+    - "4040:4040"
     volumes:
-      - ./spark-apps:/opt/spark/work-dir
-      - ./jars/postgresql-42.7.10.jar:/opt/spark/jars/postgresql-42.7.10.jar
+    - ./spark-apps:/opt/spark/work-dir
+    - ./jars/postgresql-42.7.10.jar:/opt/spark/jars/postgresql-42.7.10.jar
+    - ./jars/clickhouse-jdbc-all-0.9.8.jar:/opt/spark/jars/clickhouse-jdbc-all-0.9.8.jar
     networks:
-        - data-network
+    - data-network
     environment:
-        - SPARK_EXTRA_CLASSPATH=/opt/spark/jars-ext/*
-        - SPARK_LOCAL_IP=spark
+    # - SPARK_EXTRA_CLASSPATH=/opt/spark/jars-ext/*
+    - SPARK_LOCAL_IP=spark
     depends_on:
-        - postgres
-        - clickhouse
+    - postgres
+    - clickhouse
 
 networks:
   data-network:
