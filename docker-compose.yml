@@ -40,6 +40,7 @@ services:
       dockerfile: Dockerfile.spark
     image: spark
     container_name: spark
+    command: tail -f /dev/null
     ports:
     - "4040:4040"
     volumes:
