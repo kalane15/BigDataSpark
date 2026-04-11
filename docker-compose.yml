@@ -35,9 +35,11 @@ services:
         CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
 
   spark:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
     image: spark
     container_name: spark
-    command: tail -f /dev/null
     ports:
     - "4040:4040"
     volumes:

@@ -27,12 +27,13 @@ fact_sales = spark.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS
 dim_product = spark.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
 
 top_products = fact_sales.join(dim_product, "sale_product_id") \
-    .groupBy("product_name") \
+    .groupBy("product_name", "product_price") \
     .agg(
     sum("sale_quantity").alias("total_quantity_sold"),
     sum("sale_total_price").alias("total_revenue")
 ) \
     .orderBy(col("total_revenue").desc()) \
+    .select(["product_name", "product_price", "total_quantity_sold", "total_revenue"])\
     .limit(10)
 
 top_products.write \
