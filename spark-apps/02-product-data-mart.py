@@ -3,6 +3,15 @@ from pyspark.sql.functions import col, avg
 from pyspark.sql.functions import sum
 
 
+def log_execution(func):
+    def wrapper(*args, **kwargs):
+        print(f"Загрузка {func.__name__}...")
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@log_execution
 def top_10_products():
     fact_sales = spark.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
     dim_product = spark.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
@@ -21,6 +30,7 @@ def top_10_products():
         .jdbc(url=CH_URL, mode="overwrite", table="top_10_products", properties=CH_PROPS)
 
 
+@log_execution
 def revenue_by_category():
     fact_sales = spark.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
     dim_product = spark.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
@@ -34,6 +44,7 @@ def revenue_by_category():
         .jdbc(url=CH_URL, mode="overwrite", table="revenue_by_category", properties=CH_PROPS)
 
 
+@log_execution
 def product_reviews():
     dim_product = spark.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
 
@@ -67,10 +78,7 @@ if __name__ == "__main__":
         .getOrCreate()
     spark.sparkContext.setLogLevel("WARN")
 
-    print("Загрузка top_10_products")
     top_10_products()
-    print("Загрузка revenue_by_category")
     revenue_by_category()
-    print("Загрузка product_reviews")
     product_reviews()
     spark.stop()
