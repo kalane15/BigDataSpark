@@ -3,7 +3,7 @@ from pyspark.sql.functions import col, coalesce, try_to_date, row_number
 from pyspark.sql.window import Window
 from marts.client_sell_data_mart import *
 from marts.product_data_mart import *
-from marts.log_execution import *
+from marts.time_data_mart import *
 
 
 def write_table(df, table_name):
@@ -197,6 +197,10 @@ def main():
     top_10_customers(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
     customers_by_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
     avg_check_per_customer(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+
+    revenue_comparsion(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    trends(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    monthly_avg_order_value(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
 
 
 if __name__ == "__main__":

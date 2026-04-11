@@ -1,4 +1,3 @@
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, sum, count, avg
 from pyspark.sql.functions import concat, lit
 from log_execution import log_execution
