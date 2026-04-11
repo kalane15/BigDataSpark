@@ -38,6 +38,18 @@ wait_for_postgres
 wait_for_clickhouse
 
 cd /opt/spark/work-dir
-# Запускаем ваш основной ETL-скрипт
-echo "Starting ETL job..."
-/opt/spark/bin/spark-submit dml.py
+
+for script in *.py; do
+    if [ -f "$script" ]; then
+        echo "=========================================="
+        echo "Starting ETL job: $script"
+        echo "=========================================="
+        /opt/spark/bin/spark-submit "$script"
+        echo "Finished: $script"
+    else
+        echo "No Python scripts found in $(pwd)"
+        break
+    fi
+done
+
+echo "All ETL jobs completed."
