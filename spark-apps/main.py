@@ -1,6 +1,15 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, coalesce, try_to_date, row_number
 from pyspark.sql.window import Window
+from marts.client_sell_data_mart import *
+from marts.product_data_mart import *
+
+def log_execution(func):
+    def wrapper(*args, **kwargs):
+        print(f"Загрузка {func.__name__}...")
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 def write_table(df, table_name):
@@ -8,7 +17,7 @@ def write_table(df, table_name):
 
 
 def read_table(table_name):
-    return spark.read.jdbc(url=PG_URL, table=table_name, properties=PG_PROPS)
+    return spark_app.read.jdbc(url=PG_URL, table=table_name, properties=PG_PROPS)
 
 
 def deduplicate(df, partition_cols, order_cols):
@@ -188,6 +197,14 @@ def main():
     load_fact_sales(dim_product_with_id, dim_seller_with_id, dim_customer_with_id, dim_store_with_id)
     print("Загрузка данных завершена успешно.")
 
+    top_10_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    revenue_by_category(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    product_reviews(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+
+    top_10_customers(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    customers_by_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    avg_check_per_customer(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+
 
 if __name__ == "__main__":
     PG_URL = "jdbc:postgresql://postgres:5432/postgres"
@@ -197,13 +214,20 @@ if __name__ == "__main__":
         "driver": "org.postgresql.Driver"
     }
 
-    spark = SparkSession.builder \
+    CH_URL = "jdbc:clickhouse://clickhouse:8123/default"
+    CH_PROPS = {
+        "user": "spark_user",
+        "password": "spark_password",
+        "driver": "com.clickhouse.jdbc.ClickHouseDriver"
+    }
+
+    spark_app = SparkSession.builder \
         .appName("LoadDataWarehouse") \
         .config("spark.sql.adaptive.enabled", "true") \
         .getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
+    spark_app.sparkContext.setLogLevel("WARN")
 
-    mock_df = spark.read.jdbc(url=PG_URL, table="mock_data", properties=PG_PROPS)
+    mock_df = spark_app.read.jdbc(url=PG_URL, table="mock_data", properties=PG_PROPS)
 
     main()
-    spark.stop()
+    spark_app.stop()

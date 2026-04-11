@@ -1,4 +1,3 @@
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, avg
 from pyspark.sql.functions import sum
 
@@ -12,9 +11,9 @@ def log_execution(func):
 
 
 @log_execution
-def top_10_products():
-    fact_sales = spark.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
-    dim_product = spark.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
+def top_10_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
+    fact_sales = spark_app.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
+    dim_product = spark_app.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
 
     top_products = fact_sales.join(dim_product, "sale_product_id") \
         .groupBy("product_name", "product_price") \
@@ -31,9 +30,9 @@ def top_10_products():
 
 
 @log_execution
-def revenue_by_category():
-    fact_sales = spark.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
-    dim_product = spark.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
+def revenue_by_category(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
+    fact_sales = spark_app.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
+    dim_product = spark_app.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
 
     revenue_by_cat = fact_sales.join(dim_product, "sale_product_id") \
         .groupBy("product_category") \
@@ -45,8 +44,8 @@ def revenue_by_category():
 
 
 @log_execution
-def product_reviews():
-    dim_product = spark.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
+def product_reviews(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
+    dim_product = spark_app.read.jdbc(url=PG_URL, table="dim_product", properties=PG_PROPS)
 
     product_rating_reviews = dim_product.groupBy("product_name", "product_price") \
         .agg(
@@ -56,29 +55,3 @@ def product_reviews():
 
     product_rating_reviews.write \
         .jdbc(url=CH_URL, mode="overwrite", table="product_rating_reviews", properties=CH_PROPS)
-
-
-if __name__ == "__main__":
-    PG_URL = "jdbc:postgresql://postgres:5432/postgres"
-    PG_PROPS = {
-        "user": "postgres",
-        "password": "mysecretpassword",
-        "driver": "org.postgresql.Driver"
-    }
-    CH_URL = "jdbc:clickhouse://clickhouse:8123/default"
-    CH_PROPS = {
-        "user": "spark_user",
-        "password": "spark_password",
-        "driver": "com.clickhouse.jdbc.ClickHouseDriver"
-    }
-
-    spark = SparkSession.builder \
-        .appName("LoadDataWarehouse") \
-        .config("spark.sql.adaptive.enabled", "true") \
-        .getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
-
-    top_10_products()
-    revenue_by_category()
-    product_reviews()
-    spark.stop()

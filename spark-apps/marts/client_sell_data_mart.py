@@ -12,8 +12,8 @@ def log_execution(func):
 
 
 @log_execution
-def customers_by_country():
-    dim_customer = spark.read.jdbc(url=PG_URL, table="dim_customer", properties=PG_PROPS)
+def customers_by_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
+    dim_customer = spark_app.read.jdbc(url=PG_URL, table="dim_customer", properties=PG_PROPS)
 
     df = dim_customer.groupBy("customer_country") \
         .agg(count("*").alias("customer_count")) \
@@ -24,9 +24,9 @@ def customers_by_country():
 
 
 @log_execution
-def top_10_customers():
-    fact_sales = spark.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
-    dim_customer = spark.read.jdbc(url=PG_URL, table="dim_customer", properties=PG_PROPS)
+def top_10_customers(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
+    fact_sales = spark_app.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
+    dim_customer = spark_app.read.jdbc(url=PG_URL, table="dim_customer", properties=PG_PROPS)
 
     df = fact_sales.join(dim_customer, "sale_customer_id") \
         .groupBy(dim_customer.customer_email, dim_customer.customer_first_name, dim_customer.customer_last_name) \
@@ -40,9 +40,9 @@ def top_10_customers():
 
 
 @log_execution
-def avg_check_per_customer():
-    fact_sales = spark.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
-    dim_customer = spark.read.jdbc(url=PG_URL, table="dim_customer", properties=PG_PROPS)
+def avg_check_per_customer(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
+    fact_sales = spark_app.read.jdbc(url=PG_URL, table="fact_sales", properties=PG_PROPS)
+    dim_customer = spark_app.read.jdbc(url=PG_URL, table="dim_customer", properties=PG_PROPS)
 
     df = fact_sales.join(dim_customer, "sale_customer_id") \
         .groupBy(dim_customer.customer_email, dim_customer.customer_first_name, dim_customer.customer_last_name) \
@@ -51,28 +51,3 @@ def avg_check_per_customer():
         .select("customer_email", "customer_name", "avg_check")
 
     df.write.jdbc(url=CH_URL, mode="overwrite", table="avg_check_per_customer", properties=CH_PROPS)
-
-
-if __name__ == "__main__":
-    PG_URL = "jdbc:postgresql://postgres:5432/postgres"
-    PG_PROPS = {
-        "user": "postgres",
-        "password": "mysecretpassword",
-        "driver": "org.postgresql.Driver"
-    }
-    CH_URL = "jdbc:clickhouse://clickhouse:8123/default"
-    CH_PROPS = {
-        "user": "spark_user",
-        "password": "spark_password",
-        "driver": "com.clickhouse.jdbc.ClickHouseDriver"
-    }
-
-    spark = SparkSession.builder \
-        .appName("ClientMart") \
-        .config("spark.sql.adaptive.enabled", "true") \
-        .getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
-    top_10_customers()
-    customers_by_country()
-    avg_check_per_customer()
-    spark.stop()
