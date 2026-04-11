@@ -3,13 +3,7 @@ from pyspark.sql.functions import col, coalesce, try_to_date, row_number
 from pyspark.sql.window import Window
 from marts.client_sell_data_mart import *
 from marts.product_data_mart import *
-
-def log_execution(func):
-    def wrapper(*args, **kwargs):
-        print(f"Загрузка {func.__name__}...")
-        return func(*args, **kwargs)
-
-    return wrapper
+from marts.log_execution import *
 
 
 def write_table(df, table_name):
@@ -25,6 +19,7 @@ def deduplicate(df, partition_cols, order_cols):
     return df.withColumn("_rn", row_number().over(window_spec)).filter(col("_rn") == 1).drop("_rn")
 
 
+@log_execution
 def load_dim_customer_pet():
     dim_pet = mock_df.select(
         "customer_pet_type", "customer_pet_name", "customer_pet_breed"
@@ -35,6 +30,7 @@ def load_dim_customer_pet():
     return dim_pet_with_id
 
 
+@log_execution
 def load_dim_customer(dim_pet_with_id):
     customer_df = mock_df.select(
         "customer_first_name", "customer_last_name", "customer_age", "customer_email",
@@ -62,6 +58,7 @@ def load_dim_customer(dim_pet_with_id):
     return dim_customer_with_id
 
 
+@log_execution
 def load_dim_seller():
     seller_df = mock_df.select(
         "seller_first_name", "seller_last_name", "seller_email",
@@ -74,6 +71,7 @@ def load_dim_seller():
     return dim_seller_with_id
 
 
+@log_execution
 def load_dim_supplier():
     supplier_df = mock_df.select(
         "supplier_name", "supplier_contact", "supplier_email", "supplier_phone",
@@ -85,6 +83,7 @@ def load_dim_supplier():
     return dim_supplier_with_id
 
 
+@log_execution
 def load_dim_product(dim_supplier_with_id):
     product_df = mock_df.select(
         "supplier_name", "supplier_email", "product_name", "product_category", "product_price",
@@ -118,6 +117,7 @@ def load_dim_product(dim_supplier_with_id):
     return dim_product_with_id
 
 
+@log_execution
 def load_dim_store():
     store_df = mock_df.select(
         "store_name", "store_location", "store_city", "store_state",
@@ -130,6 +130,7 @@ def load_dim_store():
     return dim_store_with_id
 
 
+@log_execution
 def load_fact_sales(dim_product_with_id, dim_seller_with_id, dim_customer_with_id, dim_store_with_id):
     fact_df = mock_df.select(
         "product_name", "product_price", "product_color", "product_size",
@@ -181,21 +182,13 @@ def load_fact_sales(dim_product_with_id, dim_seller_with_id, dim_customer_with_i
 
 
 def main():
-    print("Загрузка dim_customer_pet...")
     dim_pet_with_id = load_dim_customer_pet()
-    print("Загрузка dim_customer...")
     dim_customer_with_id = load_dim_customer(dim_pet_with_id)
-    print("Загрузка dim_seller...")
     dim_seller_with_id = load_dim_seller()
-    print("Загрузка dim_supplier...")
     dim_supplier_with_id = load_dim_supplier()
-    print("Загрузка dim_product...")
     dim_product_with_id = load_dim_product(dim_supplier_with_id)
-    print("Загрузка dim_store...")
     dim_store_with_id = load_dim_store()
-    print("Загрузка fact_sales...")
     load_fact_sales(dim_product_with_id, dim_seller_with_id, dim_customer_with_id, dim_store_with_id)
-    print("Загрузка данных завершена успешно.")
 
     top_10_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
     revenue_by_category(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)

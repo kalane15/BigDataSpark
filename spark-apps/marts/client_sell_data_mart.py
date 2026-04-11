@@ -1,14 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, sum, count, avg
 from pyspark.sql.functions import concat, lit
-
-
-def log_execution(func):
-    def wrapper(*args, **kwargs):
-        print(f"Загрузка {func.__name__}...")
-        return func(*args, **kwargs)
-
-    return wrapper
+from log_execution import log_execution
 
 
 @log_execution
