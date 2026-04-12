@@ -222,8 +222,6 @@ def main():
     sales_by_supplier_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
 
 
-
-
 if __name__ == "__main__":
     PG_URL = "jdbc:postgresql://postgres:5432/postgres"
     PG_PROPS = {
