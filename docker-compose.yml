@@ -38,7 +38,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.spark
-    image: spark
+    image: apache/spark:latest
     container_name: spark
     ports:
     - "4040:4040"

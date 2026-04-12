@@ -4,6 +4,9 @@ from pyspark.sql.window import Window
 from marts.client_sell_data_mart import *
 from marts.product_data_mart import *
 from marts.time_data_mart import *
+from marts.store_eff_data_mart import *
+from marts.supplier_data_mart import *
+
 from log_execution.log_execution import log_execution
 
 
@@ -202,6 +205,15 @@ def main():
     revenue_comparsion(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
     trends(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
     monthly_avg_order_value(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+
+    top_stores_by_revenue(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    sales_by_city(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    sales_by_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    avg_check_per_store(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+
+    top_suppliers_by_revenue(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    avg_price_by_supplier(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    sales_by_supplier_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
 
 
 if __name__ == "__main__":
