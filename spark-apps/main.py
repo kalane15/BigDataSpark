@@ -6,6 +6,7 @@ from marts.product_data_mart import *
 from marts.time_data_mart import *
 from marts.store_eff_data_mart import *
 from marts.supplier_data_mart import *
+from marts.product_quality_data_mart import *
 
 from log_execution.log_execution import log_execution
 
@@ -194,6 +195,11 @@ def main():
     dim_store_with_id = load_dim_store()
     load_fact_sales(dim_product_with_id, dim_seller_with_id, dim_customer_with_id, dim_store_with_id)
 
+    highest_rated_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    lowest_rated_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    rating_sales_correlation(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+    most_reviewed_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+
     top_10_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
     revenue_by_category(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
     product_reviews(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
@@ -214,6 +220,8 @@ def main():
     top_suppliers_by_revenue(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
     avg_price_by_supplier(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
     sales_by_supplier_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS)
+
+
 
 
 if __name__ == "__main__":
