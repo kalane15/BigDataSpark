@@ -4,6 +4,7 @@ from pyspark.sql.window import Window
 from marts.client_sell_data_mart import *
 from marts.product_data_mart import *
 from marts.time_data_mart import *
+from log_execution.log_execution import log_execution
 
 
 def write_table(df, table_name):

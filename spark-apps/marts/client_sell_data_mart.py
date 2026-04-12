@@ -1,6 +1,6 @@
 from pyspark.sql.functions import col, sum, count, avg
 from pyspark.sql.functions import concat, lit
-from log_execution import log_execution
+from log_execution.log_execution import log_execution
 
 
 @log_execution
@@ -12,7 +12,7 @@ def customers_by_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
         .select(col("customer_country").alias("country_name"), "customer_count") \
         .orderBy("country_name")
 
-    df.write.jdbc(url=CH_URL, mode="overwrite", table="customers_by_country", properties=CH_PROPS)
+    df.write.jdbc(url=CH_URL, mode="overwrite", table="dm2_customers_by_country", properties=CH_PROPS)
 
 
 @log_execution
@@ -28,7 +28,7 @@ def top_10_customers(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
         .orderBy(col("total_spent").desc()) \
         .limit(10)
 
-    df.write.jdbc(url=CH_URL, mode="overwrite", table="top_10_customers_by_total", properties=CH_PROPS)
+    df.write.jdbc(url=CH_URL, mode="overwrite", table="dm2_top_10_customers_by_total", properties=CH_PROPS)
 
 
 @log_execution
@@ -42,4 +42,4 @@ def avg_check_per_customer(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
         .withColumn("customer_name", concat(col("customer_first_name"), lit(" "), col("customer_last_name"))) \
         .select("customer_email", "customer_name", "avg_check")
 
-    df.write.jdbc(url=CH_URL, mode="overwrite", table="avg_check_per_customer", properties=CH_PROPS)
+    df.write.jdbc(url=CH_URL, mode="overwrite", table="dm2_avg_check_per_customer", properties=CH_PROPS)
