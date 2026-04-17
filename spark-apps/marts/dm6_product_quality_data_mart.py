@@ -10,7 +10,8 @@ def highest_rated_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
 
     max_rating = dim_product.agg({"product_rating": "max"}).collect()[0][0]
     result = dim_product.filter(col("product_rating") == max_rating) \
-        .select("product_name", "product_price", "product_rating")
+        .select("product_name", "product_price", "product_rating") \
+        .orderBy(col("product_rating").desc())
 
     result.write \
         .mode("overwrite") \
@@ -23,7 +24,8 @@ def lowest_rated_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
 
     min_rating = dim_product.agg({"product_rating": "min"}).collect()[0][0]
     result = dim_product.filter(col("product_rating") == min_rating) \
-        .select("product_name", "product_price", "product_rating")
+        .select("product_name", "product_price", "product_rating") \
+        .orderBy(col("product_rating").asc())
 
     result.write \
         .mode("overwrite") \
@@ -64,7 +66,8 @@ def most_reviewed_products(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
     result = dim_product.filter(col("product_reviews").isNotNull()) \
         .orderBy(desc("product_reviews")) \
         .select("product_name", "product_reviews", "product_rating") \
-        .limit(5)
+        .limit(5) \
+        .orderBy(col("product_reviews").desc(), col("product_rating").desc())
 
     result.write \
         .mode("overwrite") \

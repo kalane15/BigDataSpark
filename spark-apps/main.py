@@ -1,12 +1,12 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, coalesce, try_to_date, row_number
 from pyspark.sql.window import Window
-from marts.client_sell_data_mart import *
-from marts.product_data_mart import *
-from marts.time_data_mart import *
-from marts.store_eff_data_mart import *
-from marts.supplier_data_mart import *
-from marts.product_quality_data_mart import *
+from marts.dm2_client_sell_data_mart import *
+from marts.dm1_product_data_mart import *
+from marts.dm3_time_data_mart import *
+from marts.dm4_store_eff_data_mart import *
+from marts.dm5_supplier_data_mart import *
+from marts.dm6_product_quality_data_mart import *
 
 from log_execution.log_execution import log_execution
 

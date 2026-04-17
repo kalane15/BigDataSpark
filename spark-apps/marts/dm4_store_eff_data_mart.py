@@ -28,8 +28,9 @@ def sales_by_city(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
         .agg(
         sum("sale_total_price").alias("total_sales"),
         sum("sale_quantity").alias("total_quantity")
-    ) \
-        .withColumnRenamed("store_city", "city")
+        ) \
+        .withColumnRenamed("store_city", "city") \
+        .orderBy(col("total_sales").desc(), col("total_quantity").desc())
 
     result.write \
         .mode("overwrite") \
@@ -47,7 +48,8 @@ def sales_by_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
         sum("sale_total_price").alias("total_sales"),
         sum("sale_quantity").alias("total_quantity")
     ) \
-        .withColumnRenamed("store_country", "country")
+        .withColumnRenamed("store_country", "country") \
+        .orderBy(col("total_sales").desc(), col("total_quantity").desc())
 
     result.write \
         .mode("overwrite") \
@@ -63,8 +65,8 @@ def avg_check_per_store(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
         .groupBy("store_name", "store_email") \
         .agg(
         avg("sale_total_price").alias("avg_check_amount"),
-        count("*").alias("total_orders")
-    )
+        ) \
+        .orderBy(col("avg_check_amount").desc())
 
     result.write \
         .mode("overwrite") \

@@ -12,7 +12,6 @@ def revenue_comparsion(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
         .groupBy("year", "month")
         .agg(
         sum("sale_total_price").alias("total_revenue"),
-        count("*").alias("total_orders"),
         avg("sale_total_price").alias("avg_order_value")
         )
         .orderBy("year", "month"))

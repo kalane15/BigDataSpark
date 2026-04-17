@@ -27,7 +27,8 @@ def avg_price_by_supplier(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
 
     result = dim_product.join(dim_supplier, "product_supplier_id") \
         .groupBy(dim_supplier.supplier_name, "supplier_email") \
-        .agg(avg("product_price").alias("avg_product_price"))
+        .agg(avg("product_price").alias("avg_product_price")) \
+        .orderBy(col("avg_product_price").desc())
 
     result.write \
         .mode("overwrite") \
@@ -46,7 +47,8 @@ def sales_by_supplier_country(spark_app, PG_URL, PG_PROPS, CH_URL, CH_PROPS):
         .agg(
         sum("sale_total_price").alias("total_sales"),
         sum("sale_quantity").alias("total_quantity")
-    )
+        ) \
+        .orderBy(col("total_sales").desc(), col("total_quantity").desc())
 
     result.write \
         .mode("overwrite") \
